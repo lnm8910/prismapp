@@ -1,8 +1,12 @@
-# Prism
+<div align="center">
+  <img src="Prismapp_Logo.png" alt="Prism Logo" width="200"/>
 
-**A lightning-fast, native text editor for macOS**
+  # Prism
 
-Prism is a modern, lightweight text editor built with Swift and AppKit, designed to fill the Notepad++ gap on macOS. It prioritizes performance, native macOS feel, and simplicity.
+  **A lightning-fast, native text editor for macOS**
+
+  Prism is a modern, lightweight text editor built with Swift and AppKit, designed to fill the Notepad++ gap on macOS. It prioritizes performance, native macOS feel, and simplicity.
+</div>
 
 ## Status: Phase 1 Complete ✅
 
