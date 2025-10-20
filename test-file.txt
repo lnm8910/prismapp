@@ -1,0 +1,36 @@
+Hello from Prism!
+
+This is a test file to verify the Prism text editor works correctly.
+
+Phase 1 Features to Test:
+✓ Open this file
+✓ Edit the text
+✓ Save changes
+✓ Check status bar shows correct line count, cursor position
+✓ Test word wrap toggle (View > Toggle Word Wrap)
+✓ Test keyboard shortcuts (Cmd+S to save, Cmd+N for new, etc.)
+✓ Verify current line highlighting
+
+Sample Code (Swift):
+func fibonacci(_ n: Int) -> Int {
+    if n <= 1 { return n }
+    return fibonacci(n - 1) + fibonacci(n - 2)
+}
+
+print(fibonacci(10))
+
+Encoding Tests:
+- UTF-8 character: 🎨
+- Emoji: 🚀 ⚡️ 💻
+- Special chars: © ® ™ € £ ¥
+
+Line ending tests will show as: LF (Unix/Mac), CRLF (Windows), or CR (old Mac)
+
+Large file testing:
+For performance testing, try opening files of varying sizes:
+- Small: < 100 KB
+- Medium: 100 KB - 1 MB
+- Large: 1 MB - 10 MB
+- Very Large: > 10 MB (should see performance optimizations kick in)
+
+End of test file.
