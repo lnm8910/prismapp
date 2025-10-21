@@ -54,12 +54,14 @@ body {
     justify-content: center;
 }
 
-.logo svg {
+.logo img {
     filter: drop-shadow(0 4px 10px rgba(102, 126, 234, 0.3));
     transition: transform 0.3s ease;
+    max-width: 100%;
+    height: auto;
 }
 
-.logo svg:hover {
+.logo img:hover {
     transform: translateY(-4px);
 }
 

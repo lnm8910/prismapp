@@ -6,7 +6,9 @@ This folder contains the static website for prismapp.dev.
 
 - `index.html` - Main landing page
 - `style.css` - Styles and responsive design
-- `favicon.svg` - Website favicon/icon
+- `logo.png` - Prism logo (triangular prism with gradient)
+- `favicon.png` - Website favicon (512x512 app icon)
+- `.htaccess` - Apache configuration for HTTPS, caching, and security
 
 ## Deployment to Namecheap cPanel
 
@@ -19,7 +21,9 @@ This folder contains the static website for prismapp.dev.
 5. Upload all files from this `website` folder:
    - `index.html`
    - `style.css`
-   - `favicon.svg`
+   - `logo.png`
+   - `favicon.png`
+   - `.htaccess`
 6. Ensure file permissions are set correctly (644 for files, 755 for directories)
 7. Visit https://prismapp.dev to verify
 
@@ -38,9 +42,11 @@ Your `public_html` directory should look like:
 
 ```
 public_html/
+├── .htaccess
 ├── index.html
 ├── style.css
-└── favicon.svg
+├── logo.png
+└── favicon.png
 ```
 
 ## SSL/HTTPS
