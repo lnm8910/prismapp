@@ -6,20 +6,20 @@
 }
 
 :root {
-    /* Primary Colors - Vibrant Purple/Blue */
-    --primary: #6366f1;
-    --primary-dark: #4f46e5;
-    --primary-light: #818cf8;
-    --secondary: #8b5cf6;
-    --accent: #ec4899;
+    /* Primary Colors - Soft Pastels */
+    --primary: #a5b4fc;
+    --primary-dark: #818cf8;
+    --primary-light: #c7d2fe;
+    --secondary: #ddd6fe;
+    --accent: #fbc7e4;
 
-    /* Text Colors - Higher Contrast */
-    --text-primary: #0f172a;
-    --text-secondary: #334155;
-    --text-muted: #64748b;
+    /* Text Colors - Softer but Readable */
+    --text-primary: #334155;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
 
-    /* Background Colors - Cleaner Neutrals */
-    --bg-primary: #ffffff;
+    /* Background Colors - Soft Pastels */
+    --bg-primary: #fefefe;
     --bg-secondary: #f8fafc;
     --bg-tertiary: #f1f5f9;
     --bg-accent: #faf5ff;
@@ -62,11 +62,11 @@ body {
     padding: 0 20px;
 }
 
-/* Hero Section - Full Width Gradient Background */
+/* Hero Section - Full Width Pastel Gradient Background */
 .hero {
     text-align: center;
     padding: 120px 20px 100px;
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    background: linear-gradient(135deg, #c7d2fe 0%, #ddd6fe 50%, #fbc7e4 100%);
     position: relative;
     overflow: hidden;
     min-height: 100vh;
@@ -150,10 +150,12 @@ body {
     font-size: 4.5rem;
     font-weight: 800;
     margin-bottom: 20px;
-    color: #ffffff;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     letter-spacing: -0.02em;
     animation: fadeInUp 0.8s ease-out 0.2s both;
-    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 40px rgba(255, 255, 255, 0.2);
 }
 
 @keyframes fadeInUp {
@@ -169,23 +171,21 @@ body {
 
 .tagline {
     font-size: 1.75rem;
-    color: rgba(255, 255, 255, 0.95);
+    color: var(--text-secondary);
     margin-bottom: 16px;
     font-weight: 600;
     animation: fadeInUp 0.8s ease-out 0.3s both;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .subtitle {
     font-size: 1.25rem;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--text-muted);
     margin-bottom: 48px;
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
     line-height: 1.7;
     animation: fadeInUp 0.8s ease-out 0.4s both;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .cta {
@@ -213,9 +213,9 @@ body {
 }
 
 .btn-primary {
-    background: rgba(255, 255, 255, 0.95);
-    color: var(--primary);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    color: white;
+    box-shadow: 0 10px 30px rgba(129, 140, 248, 0.3);
     position: relative;
     overflow: hidden;
 }
@@ -237,8 +237,7 @@ body {
 
 .btn-primary:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
-    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 15px 40px rgba(129, 140, 248, 0.4);
 }
 
 .btn-primary:active:not(:disabled) {
@@ -251,19 +250,18 @@ body {
 }
 
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
+    background: white;
+    color: var(--primary-dark);
+    border: 2px solid var(--primary-light);
+    box-shadow: 0 10px 30px rgba(129, 140, 248, 0.2);
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.5);
-    color: white;
+    background: var(--bg-secondary);
+    border-color: var(--primary);
+    color: var(--primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 15px 40px rgba(129, 140, 248, 0.3);
 }
 
 /* Features Section */
@@ -363,11 +361,11 @@ body {
     line-height: 1.7;
 }
 
-/* Philosophy Section - More Vibrant */
+/* Philosophy Section - Soft Pastels */
 .philosophy {
     padding: 100px 20px;
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
-    color: white;
+    background: linear-gradient(135deg, #ddd6fe 0%, #fbc7e4 50%, #fde2e4 100%);
+    color: var(--text-primary);
     position: relative;
     overflow: hidden;
 }
@@ -389,7 +387,7 @@ body {
 }
 
 .philosophy h2 {
-    color: white;
+    color: var(--text-primary);
 }
 
 .philosophy blockquote {
@@ -400,7 +398,7 @@ body {
     margin: 0 auto 72px;
     line-height: 1.8;
     font-weight: 500;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    color: var(--text-secondary);
 }
 
 .stats {
@@ -414,30 +412,30 @@ body {
 .stat {
     text-align: center;
     padding: 32px 24px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.6);
     border-radius: var(--radius-xl);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.8);
     transition: all 0.3s ease;
 }
 
 .stat:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.8);
     transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 20px 40px rgba(165, 180, 252, 0.3);
 }
 
 .stat-value {
     font-size: 3.5rem;
     font-weight: 800;
     margin-bottom: 12px;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    color: var(--primary-dark);
 }
 
 .stat-label {
     font-size: 1.125rem;
     font-weight: 500;
-    opacity: 0.95;
+    color: var(--text-secondary);
 }
 
 /* Tech Section */
