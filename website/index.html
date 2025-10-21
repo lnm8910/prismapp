@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Prism - A lightning-fast, native macOS text editor. The Notepad++ experience, designed for Mac.">
+    <meta name="keywords" content="text editor, macOS, native, fast, code editor, Notepad++ alternative">
+    <title>Prism - Lightning-Fast Text Editor for macOS</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <header class="hero">
+            <div class="logo">
+                <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="prismGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="64" height="64" rx="12" fill="url(#prismGradient)"/>
+                    <path d="M20 22 L32 38 L44 22 M20 42 L32 26 L44 42"
+                          stroke="white"
+                          stroke-width="3"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          fill="none"/>
+                </svg>
+            </div>
+            <h1>Prism</h1>
+            <p class="tagline">Lightning-fast text editor for macOS</p>
+            <p class="subtitle">The Notepad++ experience you've been waiting for, built natively for Mac.</p>
+            <div class="cta">
+                <button class="btn-primary" disabled>Coming Soon</button>
+                <a href="https://github.com/lnm8910/prismapp" class="btn-secondary" target="_blank">View on GitHub</a>
+            </div>
+        </header>
+
+        <!-- Features Section -->
+        <section class="features">
+            <h2>Built for Speed</h2>
+            <div class="feature-grid">
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Instant Startup</h3>
+                    <p>Cold start in under 500ms. Your workflow shouldn't wait.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Syntax Highlighting</h3>
+                    <p>Powered by Tree-sitter for accurate, blazing-fast highlighting.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📁</div>
+                    <h3>Handle Large Files</h3>
+                    <p>Edit files from 1KB to 1GB+ with smooth 60 FPS scrolling.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🍎</div>
+                    <h3>Native macOS</h3>
+                    <p>Built with AppKit for a truly native Mac experience.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💾</div>
+                    <h3>Smart Memory</h3>
+                    <p>Under 50MB for single files. Efficient and lightweight.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Powerful Find & Replace</h3>
+                    <p>Regex support, multi-file search, and instant results.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Philosophy Section -->
+        <section class="philosophy">
+            <h2>Philosophy</h2>
+            <blockquote>
+                "Performance and native feel over feature bloat. A text editor should be fast, reliable, and get out of your way."
+            </blockquote>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value">&lt;500ms</div>
+                    <div class="stat-label">Cold Startup</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">60 FPS</div>
+                    <div class="stat-label">Smooth Scrolling</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">&lt;50MB</div>
+                    <div class="stat-label">Memory Usage</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Section -->
+        <section class="tech">
+            <h2>Technology</h2>
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <strong>Language:</strong> Swift 6 with strict concurrency
+                </div>
+                <div class="tech-item">
+                    <strong>Framework:</strong> Native AppKit for maximum performance
+                </div>
+                <div class="tech-item">
+                    <strong>Highlighting:</strong> Tree-sitter for incremental parsing
+                </div>
+                <div class="tech-item">
+                    <strong>Text Engine:</strong> NSTextView with custom TextKit 2
+                </div>
+            </div>
+        </section>
+
+        <!-- Status Section -->
+        <section class="status">
+            <h2>Development Status</h2>
+            <p class="status-message">Prism is currently in active development. Follow along on GitHub to see progress and contribute to the project.</p>
+            <div class="roadmap">
+                <div class="roadmap-item completed">
+                    <div class="roadmap-marker"></div>
+                    <div class="roadmap-content">
+                        <h4>Phase 1: Foundation</h4>
+                        <p>Core text editor with file operations, document management, and basic UI.</p>
+                    </div>
+                </div>
+                <div class="roadmap-item">
+                    <div class="roadmap-marker"></div>
+                    <div class="roadmap-content">
+                        <h4>Phase 2: Syntax Highlighting</h4>
+                        <p>Tree-sitter integration, language registry, and theme system.</p>
+                    </div>
+                </div>
+                <div class="roadmap-item">
+                    <div class="roadmap-marker"></div>
+                    <div class="roadmap-content">
+                        <h4>Phase 3: Advanced Features</h4>
+                        <p>Find/replace, tabs, line numbers, auto-save, and more.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <p>&copy; 2025 Prism. Open source under the MIT License.</p>
+                <div class="footer-links">
+                    <a href="https://github.com/lnm8910/prismapp" target="_blank">GitHub</a>
+                    <a href="https://github.com/lnm8910/prismapp/issues" target="_blank">Report Issue</a>
+                    <a href="https://github.com/lnm8910/prismapp/blob/main/LICENSE" target="_blank">License</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
