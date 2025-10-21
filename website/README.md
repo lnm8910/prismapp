@@ -6,6 +6,7 @@ This folder contains the static website for prismapp.dev.
 
 - `index.html` - Main landing page
 - `style.css` - Styles and responsive design
+- `script.js` - Parallax scrolling effects and interactions
 - `logo.png` - Prism logo (triangular prism with gradient)
 - `favicon.png` - Website favicon (512x512 app icon)
 - `.htaccess` - Apache configuration for HTTPS, caching, and security
@@ -21,6 +22,7 @@ This folder contains the static website for prismapp.dev.
 5. Upload all files from this `website` folder:
    - `index.html`
    - `style.css`
+   - `script.js`
    - `logo.png`
    - `favicon.png`
    - `.htaccess`
@@ -45,6 +47,7 @@ public_html/
 ├── .htaccess
 ├── index.html
 ├── style.css
+├── script.js
 ├── logo.png
 └── favicon.png
 ```
