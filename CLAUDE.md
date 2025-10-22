@@ -281,3 +281,4 @@ The `instructions.md` file contains:
 - Comprehensive roadmap through v1.0.0
 
 Refer to `instructions.md` for specific code examples and detailed implementation guidance for each component.
+- always move generated MD files inside docs folder in project root.

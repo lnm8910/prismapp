@@ -5,7 +5,7 @@ class PrismTextView: NSTextView {
     var document: PrismDocument?
 
     // Syntax highlighting
-    private let syntaxHighlighter = SyntaxHighlighter()
+    private let syntaxHighlighter = SimpleSyntaxHighlighter()
 
     // Performance properties
     private var isLargeFile: Bool = false
@@ -61,6 +61,11 @@ class PrismTextView: NSTextView {
         if let textStorage = textStorage {
             syntaxHighlighter.setTextStorage(textStorage)
         }
+
+        // Disable file drag and drop on text view itself
+        // (handled by parent window controller instead)
+        unregisterDraggedTypes()
+        registerForDraggedTypes([.string]) // Only accept text, not files
     }
 
     func setDocument(_ doc: PrismDocument) {
@@ -74,7 +79,6 @@ class PrismTextView: NSTextView {
             isAutomaticSpellingCorrectionEnabled = false
             isContinuousSpellCheckingEnabled = false
             isGrammarCheckingEnabled = false
-            print("Large file detected (\(doc.fileSize) bytes). Some features disabled for performance.")
         }
 
         // Set text
@@ -172,6 +176,48 @@ class PrismTextView: NSTextView {
         highlightRect.origin.x = bounds.minX
         highlightRect.size.width = bounds.width
         NSBezierPath(rect: highlightRect).fill()
+    }
+
+    // MARK: - Drag and Drop Override
+
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        // Check if dragging files - show copy cursor but we'll handle in parent
+        if let items = sender.draggingPasteboard.pasteboardItems {
+            for item in items {
+                if item.types.contains(.fileURL) {
+                    return .copy // Show copy cursor for file drags
+                }
+            }
+        }
+        // Allow text drags
+        return super.draggingEntered(sender)
+    }
+
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        // Check if dragging files - forward to window controller
+        if let items = sender.draggingPasteboard.pasteboardItems {
+            for item in items {
+                if item.types.contains(.fileURL),
+                   let urlString = item.string(forType: .fileURL) {
+                    // Handle both file:// URLs and plain file paths
+                    let url: URL
+                    if urlString.hasPrefix("file://") {
+                        guard let fileURL = URL(string: urlString) else { continue }
+                        url = fileURL
+                    } else {
+                        url = URL(fileURLWithPath: urlString)
+                    }
+
+                    // Find window controller and open file
+                    if let windowController = window?.windowController as? MainWindowController {
+                        windowController.openFile(url: url)
+                        return true
+                    }
+                }
+            }
+        }
+        // Handle text drags normally
+        return super.performDragOperation(sender)
     }
 }
 

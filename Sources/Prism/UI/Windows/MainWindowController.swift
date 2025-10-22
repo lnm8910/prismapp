@@ -1,20 +1,29 @@
 import Cocoa
 
-class MainWindowController: NSWindowController, NSWindowDelegate {
+class MainWindowController: NSWindowController, NSWindowDelegate, TabBarDelegate {
     // UI Components
+    private var tabBar: TabBarView!
     private var scrollView: NSScrollView!
-    private var textView: PrismTextView!
     private var statusBar: StatusBar!
 
-    // State
-    private var currentDocument: PrismDocument?
-    private var documents: [PrismDocument] = []
+    // Tab Management
+    private var tabs: [TabItem] = []
+    private var currentTabIndex: Int = 0
+
+    private var currentTab: TabItem? {
+        guard currentTabIndex >= 0 && currentTabIndex < tabs.count else { return nil }
+        return tabs[currentTabIndex]
+    }
+
+    private var currentTextView: PrismTextView? {
+        return currentTab?.textView
+    }
 
     init() {
         // Create window
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 1000, height: 700),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+            styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )
@@ -29,9 +38,10 @@ class MainWindowController: NSWindowController, NSWindowDelegate {
         window.delegate = self
 
         setupUI()
+        setupDragAndDrop()
 
-        // Create initial document
-        newDocument()
+        // Don't create initial document here - let AppDelegate handle it
+        // This allows files passed on launch to open properly
     }
 
     required init?(coder: NSCoder) {
@@ -46,55 +56,29 @@ class MainWindowController: NSWindowController, NSWindowDelegate {
         containerView.autoresizingMask = [.width, .height]
         window.contentView = containerView
 
-        // Setup status bar first (so we know its height)
+        // Setup tab bar
+        setupTabBar(in: containerView)
+
+        // Setup status bar
         setupStatusBar(in: containerView)
 
-        // Setup text editor
-        setupTextEditor(in: containerView)
+        // Setup scroll view (text editor will be added per tab)
+        setupScrollView(in: containerView)
     }
 
-    private func setupTextEditor(in containerView: NSView) {
-        // Create text container
-        let textContainer = NSTextContainer()
-        textContainer.containerSize = NSSize(width: CGFloat.greatestFiniteMagnitude,
-                                             height: CGFloat.greatestFiniteMagnitude)
-        textContainer.widthTracksTextView = false
+    private func setupTabBar(in containerView: NSView) {
+        // Position at the top of the content area
+        let tabBarFrame = NSRect(
+            x: 0,
+            y: containerView.bounds.height - 32,
+            width: containerView.bounds.width,
+            height: 32
+        )
 
-        // Create layout manager
-        let layoutManager = NSLayoutManager()
-        layoutManager.addTextContainer(textContainer)
-
-        // Create text storage
-        let textStorage = NSTextStorage()
-        textStorage.addLayoutManager(layoutManager)
-
-        // Create text view
-        textView = PrismTextView(frame: .zero, textContainer: textContainer)
-        textView.autoresizingMask = [.width, .height]
-        textView.isVerticallyResizable = true
-        textView.isHorizontallyResizable = true
-
-        // Set callback for text changes
-        textView.onTextChange = { [weak self] in
-            self?.updateStatusBar()
-            self?.updateWindowTitle()
-        }
-
-        // Create scroll view
-        scrollView = NSScrollView(frame: containerView.bounds)
-        scrollView.autoresizingMask = [.width, .height]
-        scrollView.documentView = textView
-        scrollView.hasVerticalScroller = true
-        scrollView.hasHorizontalScroller = true
-        scrollView.autohidesScrollers = true
-
-        // Add to container (leave space for status bar)
-        var scrollFrame = containerView.bounds
-        scrollFrame.size.height -= 24 // Status bar height
-        scrollFrame.origin.y = 24
-        scrollView.frame = scrollFrame
-
-        containerView.addSubview(scrollView)
+        tabBar = TabBarView(frame: tabBarFrame)
+        tabBar.autoresizingMask = [.width, .minYMargin]
+        tabBar.delegate = self
+        containerView.addSubview(tabBar)
     }
 
     private func setupStatusBar(in containerView: NSView) {
@@ -110,16 +94,73 @@ class MainWindowController: NSWindowController, NSWindowDelegate {
         containerView.addSubview(statusBar)
     }
 
-    // MARK: - Document operations
+    private func setupScrollView(in containerView: NSView) {
+        // Calculate scroll view frame (space for tab bar at top and status bar at bottom)
+        let topSpace: CGFloat = 32 // tab bar
+        let bottomSpace: CGFloat = 24 // status bar
+
+        var scrollFrame = containerView.bounds
+        scrollFrame.size.height -= (topSpace + bottomSpace)
+        scrollFrame.origin.y = bottomSpace // Above status bar
+
+        // Create scroll view
+        scrollView = NSScrollView(frame: scrollFrame)
+        scrollView.autoresizingMask = [.width, .height]
+        scrollView.hasVerticalScroller = true
+        scrollView.hasHorizontalScroller = true
+        scrollView.autohidesScrollers = true
+        scrollView.borderType = .noBorder
+
+        containerView.addSubview(scrollView)
+    }
+
+    private func createTextViewForTab(_ tab: TabItem) -> PrismTextView {
+        // Create text container
+        let textContainer = NSTextContainer()
+        textContainer.containerSize = NSSize(width: CGFloat.greatestFiniteMagnitude,
+                                             height: CGFloat.greatestFiniteMagnitude)
+        textContainer.widthTracksTextView = false
+
+        // Create layout manager
+        let layoutManager = NSLayoutManager()
+        layoutManager.addTextContainer(textContainer)
+
+        // Create text storage
+        let textStorage = NSTextStorage()
+        textStorage.addLayoutManager(layoutManager)
+
+        // Create text view
+        let textView = PrismTextView(frame: scrollView.bounds, textContainer: textContainer)
+        textView.autoresizingMask = [.width, .height]
+        textView.isVerticallyResizable = true
+        textView.isHorizontallyResizable = true
+        textView.minSize = NSSize(width: 0, height: scrollView.contentSize.height)
+        textView.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
+
+        // Set callback for text changes
+        textView.onTextChange = { [weak self] in
+            self?.updateStatusBar()
+            self?.updateWindowTitle()
+            self?.updateTabBar()
+        }
+
+        return textView
+    }
+
+    // MARK: - Tab Management
 
     func newDocument() {
         let document = PrismDocument()
-        currentDocument = document
-        documents.append(document)
-
+        let tab = TabItem(document: document)
+        let textView = createTextViewForTab(tab)
+        tab.textView = textView
         textView.setDocument(document)
-        updateWindowTitle()
-        updateStatusBar()
+
+        tabs.append(tab)
+        currentTabIndex = tabs.count - 1
+
+        switchToTab(at: currentTabIndex)
+        // switchToTab already calls updateTabBar, updateWindowTitle, updateStatusBar
     }
 
     func openDocument() {
@@ -136,23 +177,105 @@ class MainWindowController: NSWindowController, NSWindowDelegate {
         }
     }
 
-    private func openFile(url: URL) {
+    func openFile(url: URL) {
         let document = PrismDocument(fileURL: url)
-        currentDocument = document
-        documents.append(document)
-
+        let tab = TabItem(document: document)
+        let textView = createTextViewForTab(tab)
+        tab.textView = textView
         textView.setDocument(document)
-        updateWindowTitle()
-        updateStatusBar()
+
+        tabs.append(tab)
+        currentTabIndex = tabs.count - 1
+
+        switchToTab(at: currentTabIndex)
+        // switchToTab already calls updateTabBar, updateWindowTitle, updateStatusBar
     }
 
+    private func switchToTab(at index: Int) {
+        guard index >= 0 && index < tabs.count else { return }
+
+        currentTabIndex = index
+
+        // Update scroll view with new text view
+        if let textView = tabs[index].textView {
+            scrollView.documentView = textView
+        }
+
+        updateWindowTitle()
+        updateStatusBar()
+        updateTabBar()
+    }
+
+    private func closeTab(at index: Int) {
+        guard index >= 0 && index < tabs.count else { return }
+
+        let tab = tabs[index]
+
+        // Check if document is modified
+        if tab.document.isModified {
+            let alert = NSAlert()
+            alert.messageText = "Do you want to save the changes?"
+            alert.informativeText = "Your changes will be lost if you don't save them."
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "Save")
+            alert.addButton(withTitle: "Don't Save")
+            alert.addButton(withTitle: "Cancel")
+
+            let response = alert.runModal()
+
+            switch response {
+            case .alertFirstButtonReturn: // Save
+                saveDocument()
+                if tab.document.isModified {
+                    return // Save failed or was cancelled
+                }
+            case .alertSecondButtonReturn: // Don't Save
+                break
+            default: // Cancel
+                return
+            }
+        }
+
+        // Remove tab
+        tabs.remove(at: index)
+
+        // If no tabs left, create a new one
+        if tabs.isEmpty {
+            newDocument()
+            return
+        }
+
+        // Adjust current index if needed
+        if currentTabIndex >= tabs.count {
+            currentTabIndex = tabs.count - 1
+        } else if currentTabIndex > index {
+            currentTabIndex -= 1
+        }
+
+        switchToTab(at: currentTabIndex)
+    }
+
+    // MARK: - TabBarDelegate
+
+    func tabBar(_ tabBar: TabBarView, didSelectTabAt index: Int) {
+        switchToTab(at: index)
+    }
+
+    func tabBar(_ tabBar: TabBarView, didCloseTabAt index: Int) {
+        closeTab(at: index)
+    }
+
+    // MARK: - Document operations
+
     func saveDocument() {
-        guard let document = currentDocument else { return }
+        guard let tab = currentTab else { return }
+        let document = tab.document
 
         if let url = document.fileURL {
             do {
                 try document.saveToFile(url: url)
                 updateWindowTitle()
+                updateTabBar()
                 showSaveSuccess()
             } catch {
                 showError(message: "Failed to save file: \(error.localizedDescription)")
@@ -163,7 +286,8 @@ class MainWindowController: NSWindowController, NSWindowDelegate {
     }
 
     func saveDocumentAs() {
-        guard let document = currentDocument else { return }
+        guard let tab = currentTab else { return }
+        let document = tab.document
 
         let panel = NSSavePanel()
         panel.canCreateDirectories = true
@@ -181,6 +305,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate {
                 do {
                     try document.saveToFile(url: url)
                     self?.updateWindowTitle()
+                    self?.updateTabBar()
                     self?.updateStatusBar()
                     self?.showSaveSuccess()
                 } catch {
@@ -193,19 +318,26 @@ class MainWindowController: NSWindowController, NSWindowDelegate {
     // MARK: - UI Updates
 
     private func updateWindowTitle() {
-        guard let document = currentDocument else {
+        guard let tab = currentTab else {
             window?.title = "Prism"
             return
         }
 
-        let fileName = document.fileURL?.lastPathComponent ?? "Untitled"
-        let modified = document.isModified ? "• " : ""
-        window?.title = "\(modified)\(fileName)"
-        window?.representedURL = document.fileURL
+        // Only show filename in title if it's a saved file, otherwise just "Prism"
+        if let url = tab.document.fileURL {
+            let fileName = url.lastPathComponent
+            let modified = tab.document.isModified ? "• " : ""
+            window?.title = "\(modified)\(fileName)"
+            window?.representedURL = url
+        } else {
+            window?.title = "Prism"
+            window?.representedURL = nil
+        }
     }
 
     private func updateStatusBar() {
-        guard let document = currentDocument else { return }
+        guard let tab = currentTab,
+              let textView = tab.textView else { return }
 
         // Calculate cursor position
         let selectedRange = textView.selectedRange()
@@ -215,10 +347,14 @@ class MainWindowController: NSWindowController, NSWindowDelegate {
         let cursorColumn = (lines.last?.count ?? 0) + 1
 
         statusBar.update(
-            document: document,
+            document: tab.document,
             cursorLine: cursorLine,
             cursorColumn: cursorColumn
         )
+    }
+
+    private func updateTabBar() {
+        tabBar.setTabs(tabs, selectedIndex: currentTabIndex)
     }
 
     // MARK: - View actions
@@ -244,7 +380,35 @@ class MainWindowController: NSWindowController, NSWindowDelegate {
     }
 
     func toggleWordWrap() {
-        textView.toggleWordWrap()
+        currentTextView?.toggleWordWrap()
+    }
+
+    // MARK: - Drag and Drop
+
+    private func setupDragAndDrop() {
+        guard let window = window, let contentView = window.contentView else { return }
+
+        // Register for dragged file types
+        contentView.registerForDraggedTypes([.fileURL])
+
+        // Set self as the dragging destination delegate
+        // We need to create a custom view that forwards drag events
+        if let customView = contentView as? DraggingDestinationView {
+            customView.delegate = self
+        } else {
+            // Replace content view with our custom view that supports dragging
+            let draggingView = DraggingDestinationView(frame: contentView.frame)
+            draggingView.delegate = self
+            draggingView.autoresizingMask = [.width, .height]
+
+            // Move all subviews to the new view
+            for subview in contentView.subviews {
+                subview.removeFromSuperview()
+                draggingView.addSubview(subview)
+            }
+
+            window.contentView = draggingView
+        }
     }
 
     // MARK: - Helper methods
@@ -268,34 +432,86 @@ class MainWindowController: NSWindowController, NSWindowDelegate {
     // MARK: - NSWindowDelegate
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        guard let document = currentDocument, document.isModified else {
-            return true
+        // Check all tabs for unsaved changes
+        for (index, tab) in tabs.enumerated() {
+            if tab.document.isModified {
+                // Switch to the tab with changes
+                switchToTab(at: index)
+
+                let alert = NSAlert()
+                alert.messageText = "Do you want to save the changes to \"\(tab.title)\"?"
+                alert.informativeText = "Your changes will be lost if you don't save them."
+                alert.alertStyle = .warning
+                alert.addButton(withTitle: "Save")
+                alert.addButton(withTitle: "Don't Save")
+                alert.addButton(withTitle: "Cancel")
+
+                let response = alert.runModal()
+
+                switch response {
+                case .alertFirstButtonReturn: // Save
+                    saveDocument()
+                    if tab.document.isModified {
+                        return false // Save failed or was cancelled
+                    }
+                case .alertSecondButtonReturn: // Don't Save
+                    continue
+                default: // Cancel
+                    return false
+                }
+            }
         }
 
-        let alert = NSAlert()
-        alert.messageText = "Do you want to save the changes?"
-        alert.informativeText = "Your changes will be lost if you don't save them."
-        alert.alertStyle = .warning
-        alert.addButton(withTitle: "Save")
-        alert.addButton(withTitle: "Don't Save")
-        alert.addButton(withTitle: "Cancel")
-
-        let response = alert.runModal()
-
-        switch response {
-        case .alertFirstButtonReturn: // Save
-            saveDocument()
-            return !document.isModified // Close only if save succeeded
-        case .alertSecondButtonReturn: // Don't Save
-            return true
-        default: // Cancel
-            return false
-        }
+        return true
     }
 
     func windowDidBecomeKey(_ notification: Notification) {
         // Update status bar when window becomes active
         updateStatusBar()
+    }
+}
+
+// MARK: - NSDraggingDestination for Drag and Drop
+
+extension MainWindowController: NSDraggingDestination {
+    func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        // Check if the dragged items contain file URLs
+        guard let items = sender.draggingPasteboard.pasteboardItems else {
+            return []
+        }
+
+        for item in items {
+            if item.types.contains(.fileURL) {
+                return .copy
+            }
+        }
+
+        return []
+    }
+
+    func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let items = sender.draggingPasteboard.pasteboardItems else {
+            return false
+        }
+
+        for item in items {
+            if let urlString = item.string(forType: .fileURL) {
+                // Handle both file:// URLs and plain file paths
+                let url: URL
+                if urlString.hasPrefix("file://") {
+                    guard let fileURL = URL(string: urlString) else { continue }
+                    url = fileURL
+                } else {
+                    url = URL(fileURLWithPath: urlString)
+                }
+
+                // Open the dropped file in a new tab
+                openFile(url: url)
+                return true
+            }
+        }
+
+        return false
     }
 }
 

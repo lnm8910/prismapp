@@ -2,6 +2,7 @@ import Cocoa
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var windowController: MainWindowController?
+    private var pendingFileURL: URL?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Set activation policy to regular app (shows in Dock, can have windows)
@@ -14,16 +15,55 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         windowController = MainWindowController()
         windowController?.showWindow(nil)
 
+        // Open pending file if one was requested before launch completed
+        if let url = pendingFileURL {
+            windowController?.openFile(url: url)
+            pendingFileURL = nil
+        } else {
+            // Only create a blank document if no file was requested
+            windowController?.newDocument()
+        }
+
         // Activate the app (bring to foreground)
         NSApp.activate(ignoringOtherApps: true)
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        return false // Keep app running like native Mac apps
+        return true // Quit app when last window closes (like TextEdit)
     }
 
     func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool {
-        return true // Open blank file on launch
+        // We handle document creation manually in applicationDidFinishLaunching
+        return false
+    }
+
+    func applicationOpenUntitledFile(_ sender: NSApplication) -> Bool {
+        // We handle document creation manually in applicationDidFinishLaunching
+        return false
+    }
+
+    func application(_ sender: NSApplication, openFile filename: String) -> Bool {
+        let url = URL(fileURLWithPath: filename)
+
+        if let wc = windowController {
+            wc.openFile(url: url)
+        } else {
+            pendingFileURL = url
+        }
+        return true
+    }
+
+    func application(_ application: NSApplication, open urls: [URL]) {
+        for url in urls {
+            if let wc = windowController {
+                wc.openFile(url: url)
+            } else {
+                // Store only the first URL as pending
+                if pendingFileURL == nil {
+                    pendingFileURL = url
+                }
+            }
+        }
     }
 
     private func setupMenuBar() {
@@ -85,6 +125,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func createFileMenu() -> NSMenu {
         let menu = NSMenu(title: "File")
 
+        menu.addItem(NSMenuItem(
+            title: "New Tab",
+            action: #selector(newDocument),
+            keyEquivalent: "t"
+        ))
         menu.addItem(NSMenuItem(
             title: "New",
             action: #selector(newDocument),

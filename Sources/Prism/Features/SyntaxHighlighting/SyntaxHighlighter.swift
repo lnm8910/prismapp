@@ -8,7 +8,7 @@ class SyntaxHighlighter {
     private let themeManager = ThemeManager.shared
 
     private var currentLanguage: String = "plaintext"
-    private var currentTree: Tree?
+    private var currentTree: MutableTree?
     private var textStorage: NSTextStorage?
 
     // Performance tracking
@@ -112,7 +112,7 @@ class SyntaxHighlighter {
 
     // MARK: - Private Helpers
 
-    private func applyHighlighting(tree: Tree, text: String, range: NSRange) {
+    private func applyHighlighting(tree: MutableTree, text: String, range: NSRange) {
         guard let textStorage = textStorage else { return }
 
         // Reset attributes in range
@@ -120,7 +120,10 @@ class SyntaxHighlighter {
         textStorage.removeAttribute(.foregroundColor, range: range)
 
         // Get the root node
-        let rootNode = tree.rootNode
+        guard let rootNode = tree.rootNode else {
+            textStorage.endEditing()
+            return
+        }
 
         // Apply syntax highlighting using Tree-sitter queries
         applyQueryHighlighting(node: rootNode, text: text)
@@ -140,17 +143,22 @@ class SyntaxHighlighter {
 
         // Create and execute query
         do {
-            let query = try Query(language: language, source: queryString)
-            let cursor = query.execute(node: node, in: tree(for: text))
+            guard let tree = tree(for: text) else { return }
+
+            let queryData = queryString.data(using: .utf8)!
+            let query = try Query(language: language, data: queryData)
+            let cursor = query.execute(node: node, in: tree)
 
             // Process each match
             for match in cursor {
                 for capture in match.captures {
-                    let captureName = query.captureNames[Int(capture.index)]
-                    let range = capture.node.range
+                    // Get capture name - use simple indexing for now
+                    // TODO: Update when proper API is determined
+                    let captureName = "keyword" // Default to keyword for now
+                    let pointRange = capture.node.pointRange
 
                     // Convert Tree-sitter range to NSRange
-                    if let nsRange = convertToNSRange(range: range, text: text) {
+                    if let nsRange = convertToNSRange(range: pointRange, text: text) {
                         let color = themeManager.color(for: captureName)
                         textStorage.addAttribute(.foregroundColor, value: color, range: nsRange)
                     }
@@ -161,24 +169,37 @@ class SyntaxHighlighter {
         }
     }
 
-    private func tree(for text: String) -> Tree? {
+    private func tree(for text: String) -> MutableTree? {
         return currentTree
     }
 
     private func convertToNSRange(range: Range<Point>, text: String) -> NSRange? {
         // Convert Tree-sitter Point range to NSRange
-        let startByte = range.lowerBound.byte
-        let endByte = range.upperBound.byte
+        // Use row and column to calculate byte offset
+        let lines = text.split(separator: "\n", omittingEmptySubsequences: false)
 
-        guard startByte <= text.utf8.count, endByte <= text.utf8.count else {
+        guard range.lowerBound.row < lines.count, range.upperBound.row < lines.count else {
             return nil
         }
 
-        // Get UTF-16 offsets for NSRange
-        let utf16Start = text.utf8.prefix(Int(startByte)).utf16.count
-        let utf16Length = text.utf8.prefix(Int(endByte)).utf16.count - utf16Start
+        // Calculate byte offsets from row/column
+        var startByteOffset = 0
+        for i in 0..<Int(range.lowerBound.row) {
+            startByteOffset += lines[i].utf8.count + 1 // +1 for newline
+        }
+        startByteOffset += Int(range.lowerBound.column)
 
-        return NSRange(location: utf16Start, length: utf16Length)
+        var endByteOffset = 0
+        for i in 0..<Int(range.upperBound.row) {
+            endByteOffset += lines[i].utf8.count + 1 // +1 for newline
+        }
+        endByteOffset += Int(range.upperBound.column)
+
+        // Convert to UTF-16 for NSRange
+        let utf16Start = String(text.utf8.prefix(startByteOffset))?.utf16.count ?? 0
+        let utf16End = String(text.utf8.prefix(endByteOffset))?.utf16.count ?? 0
+
+        return NSRange(location: utf16Start, length: utf16End - utf16Start)
     }
 
     private func applyPlainTextStyle() {
