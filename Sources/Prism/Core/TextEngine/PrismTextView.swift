@@ -4,6 +4,9 @@ class PrismTextView: NSTextView {
     // Custom properties
     var document: PrismDocument?
 
+    // Syntax highlighting
+    private let syntaxHighlighter = SyntaxHighlighter()
+
     // Performance properties
     private var isLargeFile: Bool = false
     private let largeFileThreshold: Int = 10_000_000 // 10MB
@@ -53,6 +56,11 @@ class PrismTextView: NSTextView {
 
         // Text insets for comfortable reading
         textContainerInset = NSSize(width: 5, height: 10)
+
+        // Setup syntax highlighter
+        if let textStorage = textStorage {
+            syntaxHighlighter.setTextStorage(textStorage)
+        }
     }
 
     func setDocument(_ doc: PrismDocument) {
@@ -71,6 +79,10 @@ class PrismTextView: NSTextView {
 
         // Set text
         string = doc.content
+
+        // Setup syntax highlighting
+        syntaxHighlighter.setLanguage(doc.language)
+        syntaxHighlighter.highlightAll()
     }
 
     func toggleWordWrap() {
@@ -174,6 +186,11 @@ extension PrismTextView: NSTextViewDelegate {
 
         // Notify delegate
         onTextChange?()
+
+        // Update syntax highlighting incrementally
+        // For now, re-highlight all on change
+        // TODO: implement incremental updates based on edited range
+        syntaxHighlighter.highlightAll()
     }
 
     func textView(_ textView: NSTextView,
