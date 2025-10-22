@@ -33,10 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const scaleFactor = 1 - (scrolled / heroHeight) * 0.1;
 
             // Apply parallax transformations
-            if (logo) {
-                logo.style.transform = `translateY(${parallaxFactor * 0.3}px) scale(${scaleFactor})`;
-                logo.style.opacity = opacityFactor;
-            }
+            // Logo stays fixed - no parallax effect
 
             if (heroTitle) {
                 heroTitle.style.transform = `translateY(${parallaxFactor * 0.5}px)`;
