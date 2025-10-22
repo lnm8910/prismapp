@@ -54,6 +54,8 @@ body {
     background: var(--bg-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    padding: 0;
 }
 
 .container {
@@ -64,15 +66,16 @@ body {
 
 /* Hero Section - Full Width Pastel Gradient Background */
 .hero {
-    text-align: center;
-    padding: 120px 20px 100px;
+    width: 100%;
     background: linear-gradient(135deg, #c7d2fe 0%, #ddd6fe 50%, #fbc7e4 100%);
     position: relative;
     overflow: hidden;
     min-height: 100vh;
     display: flex;
-    flex-direction: column;
+    align-items: center;
     justify-content: center;
+    padding: 0;
+    margin: 0;
 }
 
 .hero::before {
@@ -111,7 +114,11 @@ body {
     opacity: 1;
 }
 
-.hero > * {
+.hero-content {
+    max-width: 1200px;
+    width: 100%;
+    padding: 120px 20px 100px;
+    text-align: center;
     position: relative;
     z-index: 1;
 }
@@ -363,11 +370,13 @@ body {
 
 /* Philosophy Section - Soft Pastels */
 .philosophy {
-    padding: 100px 20px;
+    width: 100%;
     background: linear-gradient(135deg, #ddd6fe 0%, #fbc7e4 50%, #fde2e4 100%);
     color: var(--text-primary);
     position: relative;
     overflow: hidden;
+    padding: 0;
+    margin: 0;
 }
 
 .philosophy::before {
@@ -381,7 +390,11 @@ body {
     opacity: 1;
 }
 
-.philosophy > * {
+.philosophy-content {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 100px 20px;
     position: relative;
     z-index: 1;
 }
